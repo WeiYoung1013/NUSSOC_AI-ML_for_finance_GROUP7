@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}最佳策略 - 智能股票推荐系统{% endblock %}
+
+{% block content %}
+<div class="container" style="text-align: center; margin-top: 50px;">
+    <h1 style="font-size: 50px;">最佳策略</h1>
+    <p>请选择最多五支股票作为您的投资组合：</p>
+    <input type="text" id="stock-search" placeholder="搜索股票代码..." style="width: 100%; padding: 10px; margin-bottom: 20px; box-sizing: border-box;">
+    <form id="strategy-form" action="/strategy" method="post">
+        <div class="form-group" id="stock-list" style="text-align: left; max-height: 400px; overflow-y: auto;">
+            {% for stock in stocks %}
+            <div class="stock-item">
+                <input type="checkbox" id="{{ stock }}" name="stocks" value="{{ stock }}" class="stock-checkbox">
+                <label for="{{ stock }}">{{ stock }}</label>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            <button type="submit">提交</button>
+        </div>
+    </form>
+    <p id="error-message" style="color: red; display: none;">您最多只能选择五支股票。</p>
+</div>
+
+<script>
+    document.getElementById('strategy-form').onsubmit = function(e) {
+        const checkedBoxes = document.querySelectorAll('.stock-checkbox:checked');
+        if (checkedBoxes.length > 5) {
+            e.preventDefault();
+            document.getElementById('error-message').style.display = 'block';
+        } else {
+            document.getElementById('error-message').style.display = 'none';
+        }
+    };
+
+    document.getElementById('stock-search').addEventListener('input', function() {
+        const filter = this.value.toUpperCase();
+        const stockItems = document.querySelectorAll('.stock-item');
+        stockItems.forEach(function(item) {
+            const label = item.querySelector('label').innerText;
+            if (label.toUpperCase().indexOf(filter) > -1) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

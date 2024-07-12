@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}首页 - 智能股票推荐系统{% endblock %}
+
+{% block content %}
+<div class="container" style="text-align: center; margin-top: 50px;">
+    <h2>市值最高的前10支股票</h2>
+    <ul>
+        {% for stock in top_10_market_cap %}
+        <li>{{ stock.ticker }} - 市值: {{ stock.market_cap }}</li>
+        {% endfor %}
+    </ul>
+    
+    <h2>增长量最高的前10支股票</h2>
+    <ul>
+        {% for stock in top_10_growth_amount %}
+        <li>{{ stock.ticker }} - 增长量: {{ stock.growth_amount }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>增长率最高的前10支股票</h2>
+    <ul>
+        {% for stock in top_10_growth_rate %}
+        <li>{{ stock.ticker }} - 增长率: {{ stock.growth_rate }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
