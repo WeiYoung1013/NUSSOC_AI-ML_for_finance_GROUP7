@@ -65,7 +65,11 @@
         <a href="/">智能股票交易策略bot</a>
         <div class="navbar-right">
             <a href="/">最佳股票</a>
-            <a href="/strategy">最佳策略</a>
+            {% if user %}
+                <a href="/strategy">最佳策略</a>
+            {% else %}
+                <a href="/auth/login">最佳策略</a>
+            {% endif %}
             {% if user %}
                 <span class="nav-link">{{ user.user_name }}</span>
                 <a class="nav-link" href="/auth/logout">退出登录</a>

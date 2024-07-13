@@ -3,8 +3,7 @@ import config
 from blueprints.homepage import hp
 from blueprints.strategy import st
 from blueprints.auth import auth
-
-from extends import db
+from extends import db, cache
 from flask_migrate import Migrate
 from models import UserModel
 
@@ -14,11 +13,13 @@ app.secret_key = 'gaiucsahsaiuubviyh2'
 app.config.from_object(config)
 db.init_app(app)
 migrate = Migrate(app, db)
+# 配置缓存
+cache.init_app(app, config={'CACHE_TYPE': 'simple'})  # 使用简单缓存
+
 
 app.register_blueprint(hp)
 app.register_blueprint(st)
 app.register_blueprint(auth)
-
 
 @app.before_request
 def my_before_request():
@@ -32,7 +33,6 @@ def my_before_request():
 @app.context_processor
 def my_context_processor():
     return {"user":g.user}
-
 
 if __name__ == '__main__':
     app.run(debug=True)

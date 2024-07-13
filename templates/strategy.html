@@ -10,9 +10,9 @@
     <form id="strategy-form" action="/strategy" method="post">
         <div class="form-group" id="stock-list" style="text-align: left; max-height: 400px; overflow-y: auto;">
             {% for stock in stocks %}
-            <div class="stock-item">
-                <input type="checkbox" id="{{ stock }}" name="stocks" value="{{ stock }}" class="stock-checkbox">
-                <label for="{{ stock }}">{{ stock }}</label>
+            <div class="stock-item" style="display: flex; align-items: center; margin-bottom: 5px; white-space: nowrap;">
+                <label for="{{ stock }}" style="flex: 0 0 auto; width: 100px; text-align: right; margin-right: 10px;">{{ stock }}</label>
+                <input type="checkbox" id="{{ stock }}" name="stocks" value="{{ stock }}" class="stock-checkbox" style="margin-left: 10px;">
             </div>
             {% endfor %}
         </div>
