@@ -4,6 +4,32 @@ from extends import cache  # 导入缓存实例
 
 hp = Blueprint('hp', __name__, url_prefix="/")
 
+# 定义自定义过滤器
+def format_number(value):
+    if isinstance(value, (float, int)):
+        if value > 1e6:
+            return f"{value:.2e}"  # 使用科学计数法
+        return f"{value:.2f}"  # 保留两位小数
+    return value
+
+def format_percentage(value):
+    if isinstance(value, (float, int)):
+        return f"{value:.2%}"  # 转换为百分比格式
+    return value
+
+# 注册过滤器
+@hp.app_template_filter()
+def scientific(value):
+    return format_number(value)
+
+@hp.app_template_filter()
+def format_two_decimal(value):
+    return format_number(value)
+
+@hp.app_template_filter()
+def percentage(value):
+    return format_percentage(value)
+
 @hp.route('')
 def homepage():
     data = cache.get('stock_data')

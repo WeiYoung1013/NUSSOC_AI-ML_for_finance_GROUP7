@@ -5,6 +5,17 @@
 {% block head %}
 <!-- 引入 Bootstrap CSS -->
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+<style>
+    th, td {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    th {
+        font-size: 14px; /* 调整表头字体大小 */
+    }
+</style>
+
 {% endblock %}
 
 {% block content %}
@@ -12,27 +23,72 @@
     <div class="row">
         <div class="col-md-4">
             <h2>市值最高的前10支股票</h2>
-            <ul>
-                {% for stock in top_10_market_cap %}
-                <li>{{ stock.ticker }} - 市值: {{ stock.market_cap }}</li>
-                {% endfor %}
-            </ul>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>股票代码</th>
+                        <th>市值</th>
+                        <th>增长量</th>
+                        <th>增长率</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stock in top_10_market_cap %}
+                    <tr>
+                        <td>{{ stock.ticker }}</td>
+                        <td>{{ stock.market_cap|scientific }}</td>
+                        <td>{{ stock.growth_amount|format_two_decimal }}</td>
+                        <td>{{ stock.growth_rate|percentage }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
         <div class="col-md-4">
             <h2>增长量最高的前10支股票</h2>
-            <ul>
-                {% for stock in top_10_growth_amount %}
-                <li>{{ stock.ticker }} - 增长量: {{ stock.growth_amount }}</li>
-                {% endfor %}
-            </ul>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>股票代码</th>
+                        <th>市值</th>
+                        <th>增长量</th>
+                        <th>增长率</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stock in top_10_growth_amount %}
+                    <tr>
+                        <td>{{ stock.ticker }}</td>
+                        <td>{{ stock.market_cap|scientific }}</td>
+                        <td>{{ stock.growth_amount|format_two_decimal }}</td>
+                        <td>{{ stock.growth_rate|percentage }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
         <div class="col-md-4">
             <h2>增长率最高的前10支股票</h2>
-            <ul>
-                {% for stock in top_10_growth_rate %}
-                <li>{{ stock.ticker }} - 增长率: {{ stock.growth_rate }}</li>
-                {% endfor %}
-            </ul>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>股票代码</th>
+                        <th>市值</th>
+                        <th>增长量</th>
+                        <th>增长率</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stock in top_10_growth_rate %}
+                    <tr>
+                        <td>{{ stock.ticker }}</td>
+                        <td>{{ stock.market_cap|scientific }}</td>
+                        <td>{{ stock.growth_amount|format_two_decimal }}</td>
+                        <td>{{ stock.growth_rate|percentage }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
