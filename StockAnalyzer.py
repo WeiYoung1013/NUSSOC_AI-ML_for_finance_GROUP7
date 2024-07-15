@@ -22,6 +22,9 @@ class StockAnalyzer:
             info = stock.info
             if 'marketCap' in info and info['marketCap'] is not None:
                 market_cap = info['marketCap']
+                # 修正 AVGO 市值问题
+                if symbol == 'AVGO':
+                    market_cap /= 10
                 market_caps[symbol] = market_cap
 
         sorted_market_caps = {k: v for k, v in sorted(market_caps.items(), key=lambda item: item[1], reverse=True)}
@@ -38,13 +41,17 @@ class StockAnalyzer:
                 latest_close = hist['Close'].iloc[-1]
                 growth_amount = latest_close - prev_close
                 growth_rate = growth_amount / prev_close
+                market_cap = stock.info['marketCap']
+                # 修正 AVGO 市值问题
+                if ticker == 'AVGO':
+                    market_cap /= 10
                 stock_data.append({
                     'ticker': ticker,
                     'prev_close': prev_close,
                     'latest_close': latest_close,
                     'growth_amount': growth_amount,
                     'growth_rate': growth_rate,
-                    'market_cap': stock.info['marketCap']
+                    'market_cap': market_cap
                 })
         df = pd.DataFrame(stock_data)
         return df
@@ -60,5 +67,3 @@ class StockAnalyzer:
     def get_top_10_by_market_cap(self):
         top_10_market_cap = self.stock_data.nlargest(10, 'market_cap')
         return top_10_market_cap
-
-
