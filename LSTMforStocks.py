@@ -8,21 +8,19 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-
-def lstm_trading_strategy(tickers = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META'],
-                            start_train = '2019-01-01',
-                            end_train = '2023-12-31',
-                            start_test = '2024-01-01',
-                            end_test = '2024-12-31', 
-                            initial_cash = 10000,
-                            investment_percentage=0.15, 
-                            window_size = 5):
-
+def lstm_trading_strategy(tickers=['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META'],
+                          start_train='2019-01-01',
+                          end_train='2023-12-31',
+                          start_test='2024-01-01',
+                          end_test='2024-12-31',
+                          initial_cash=10000,
+                          investment_percentage=0.15,
+                          window_size=5):
 
     # 获取数据
     def download_data(ticker, start, end):
         df = yf.download(ticker, start=start, end=end)
-        df['Change'] = df['Close'].pct_change()
+        df['Change'] = df['Close'].diff()
         df = df.dropna()
         return df
 
@@ -39,19 +37,16 @@ def lstm_trading_strategy(tickers = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META'],
     def build_lstm_model(input_shape):
         model = tf.keras.Sequential([
             tf.keras.layers.Input(shape=input_shape),
-            tf.keras.layers.LSTM(50, return_sequences=True),
-            tf.keras.layers.LSTM(50),
+            tf.keras.layers.LSTM(128, return_sequences=True),
+            tf.keras.layers.LSTM(64),
             tf.keras.layers.Dense(1)
         ])
-        model.compile(optimizer='adam', loss='mse')
+        model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001), loss='mse')
         return model
 
     # 初始化参数
     cash = initial_cash
     positions = {ticker: 0 for ticker in tickers}
-    investment_percentage = 0.15  # 投资比例
-    window_size = 5
-
     cash_history = []
 
     # 获取并处理数据
@@ -67,7 +62,7 @@ def lstm_trading_strategy(tickers = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META'],
 
     # 获取基准数据（例如S&P 500）
     benchmark = yf.download('^GSPC', start=start_test, end=end_test)
-    benchmark['Return'] = benchmark['Close'].pct_change().dropna()
+    benchmark['Return'] = benchmark['Close'].diff().dropna()
 
     # 训练和预测
     predictions_dict = {}
@@ -86,12 +81,23 @@ def lstm_trading_strategy(tickers = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META'],
         X_test = X_test.reshape((X_test.shape[0], X_test.shape[1], 1))
 
         model = build_lstm_model((window_size, 1))
-        model.fit(X_train, y_train, epochs=20, batch_size=32, verbose=0)
+        model.fit(X_train, y_train, epochs=100, batch_size=32, verbose=1)
 
         predictions = model.predict(X_test).flatten()
         df_test = df_test.iloc[window_size:]
         df_test['Predicted_Change'] = predictions
         predictions_dict[ticker] = df_test
+
+        # 绘制真实股价与预测股价的对比图
+        plt.figure(figsize=(12, 6))
+        plt.plot(df_test.index, df_test['Change'], label='Actual Price Change')
+        plt.plot(df_test.index, df_test['Predicted_Change'], label='Predicted Price Change')
+        plt.title(f'{ticker} Actual vs Predicted Price Change')
+        plt.xlabel('Date')
+        plt.ylabel('Price Change')
+        plt.legend()
+        plt.savefig(os.path.join('static', f'images/{ticker}_actual_vs_predicted.png'))
+        plt.close()
 
     # 创建测试日期范围
     test_dates = predictions_dict[tickers[0]].index
@@ -128,7 +134,10 @@ def lstm_trading_strategy(tickers = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META'],
     # 计算策略收益率
     strategy_returns = np.diff(cash_history) / cash_history[:-1]
 
-    # 绘制现金历史曲线
+    # 获取实际的交易天数
+    actual_trading_days = len(dates)
+
+    # 绘制现金历史曲线并保存图片
     plt.figure(figsize=(12, 6))
     plt.plot(dates, cash_history, label='Portfolio Value')
     plt.title('Portfolio Value Over Time')
@@ -141,18 +150,19 @@ def lstm_trading_strategy(tickers = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META'],
 
     # 计算Sharpe Ratio
     risk_free_rate = 0.01
-    excess_returns = strategy_returns - risk_free_rate / 252
-    sharpe_ratio = np.mean(excess_returns) / np.std(excess_returns) * np.sqrt(252)
+    excess_returns = strategy_returns - risk_free_rate / actual_trading_days
+    sharpe_ratio = np.mean(excess_returns) / np.std(excess_returns) * np.sqrt(actual_trading_days)
     print(f"Sharpe Ratio: {sharpe_ratio:.2f}")
 
     # 计算Alpha和Beta
     benchmark_returns = benchmark['Return'][benchmark.index.isin(dates)]
     benchmark_returns = benchmark_returns.iloc[:len(strategy_returns)]  # 确保长度一致
     beta, alpha = np.polyfit(benchmark_returns, strategy_returns, 1)
-    alpha = alpha * 252  # 年化Alpha
+    alpha = alpha * actual_trading_days  # 年化Alpha
 
     # 计算最终收益
     final_cash = cash_history[-1]
     return_rate = (final_cash - initial_cash) / initial_cash * 100
     
     return return_rate, sharpe_ratio, alpha, beta, image_path
+

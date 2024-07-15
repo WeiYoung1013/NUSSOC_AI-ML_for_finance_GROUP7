@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}智能股票推荐系统{% endblock %}</title>
+    <title>{% block title %}Intelligent Stock Trading bot{% endblock %}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -62,20 +62,20 @@
 </head>
 <body>
     <div class="navbar">
-        <a href="/">智能股票交易策略bot</a>
+        <a href="/">Intelligent Stock Trading bot</a>
         <div class="navbar-right">
-            <a href="/">最佳股票</a>
+            <a href="/">Best Stocks</a>
             {% if user %}
-                <a href="/strategy">最佳策略</a>
+                <a href="/strategy">Best Strategies</a>
             {% else %}
-                <a href="/auth/login">最佳策略</a>
+                <a href="/auth/login">Best Strategies</a>
             {% endif %}
             {% if user %}
                 <span class="nav-link">{{ user.user_name }}</span>
-                <a class="nav-link" href="/auth/logout">退出登录</a>
+                <a class="nav-link" href="/auth/logout">Log out</a>
             {% else %}
-                <a href="/auth/register">注册</a>
-                <a href="/auth/login">登录</a>
+                <a href="/auth/register">Register</a>
+                <a href="/auth/login">Log in</a>
             {% endif %}
         </div>
     </div>

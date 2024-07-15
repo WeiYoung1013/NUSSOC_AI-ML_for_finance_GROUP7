@@ -9,12 +9,14 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 
-def xgboost_trading_strategy(tickers, initial_cash=10000, investment_percentage=0.15, window_size=5):
-    # 设置日期
-    start_train = '2019-01-01'
-    end_train = '2023-12-31'
-    start_test = '2024-01-01'
-    end_test = '2024-12-31'
+def xgboost_trading_strategy(tickers = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META'],
+                            start_train = '2019-01-01',
+                            end_train = '2023-12-31',
+                            start_test = '2024-01-01',
+                            end_test = '2024-7-10', 
+                            initial_cash = 10000,
+                            investment_percentage=0.15, 
+                            window_size = 5):
     
     # 获取数据
     def download_data(ticker, start, end):
@@ -107,6 +109,9 @@ def xgboost_trading_strategy(tickers, initial_cash=10000, investment_percentage=
     # 计算策略收益率
     strategy_returns = np.diff(cash_history) / cash_history[:-1]
 
+    # 获取实际的交易天数
+    actual_trading_days = len(dates)
+
     # 绘制现金历史曲线并保存图片
     plt.figure(figsize=(12, 6))
     plt.plot(dates, cash_history, label='Portfolio Value')
@@ -120,19 +125,18 @@ def xgboost_trading_strategy(tickers, initial_cash=10000, investment_percentage=
 
     # 计算Sharpe Ratio
     risk_free_rate = 0.01
-    excess_returns = strategy_returns - risk_free_rate / 252
-    sharpe_ratio = np.mean(excess_returns) / np.std(excess_returns) * np.sqrt(252)
+    excess_returns = strategy_returns - risk_free_rate / actual_trading_days
+    sharpe_ratio = np.mean(excess_returns) / np.std(excess_returns) * np.sqrt(actual_trading_days)
 
     # 计算Alpha和Beta
     benchmark_returns = benchmark['Return'][benchmark.index.isin(dates)]
     benchmark_returns = benchmark_returns.iloc[:len(strategy_returns)]  # 确保长度一致
     beta, alpha = np.polyfit(benchmark_returns, strategy_returns, 1)
-    alpha = alpha * 252  # 年化Alpha
+    alpha = alpha * actual_trading_days  # 年化Alpha
 
     # 计算最终收益
     final_cash = cash_history[-1]
     return_rate = (final_cash - initial_cash) / initial_cash * 100
 
     return return_rate, sharpe_ratio, alpha, beta, image_path
-
 

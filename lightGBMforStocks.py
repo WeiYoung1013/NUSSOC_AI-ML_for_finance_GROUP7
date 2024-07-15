@@ -8,14 +8,14 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-def lightgbm_trading_strategy(tickers, 
-                                        start_train = '2019-01-01',
-                                        end_train = '2023-12-31',
-                                        start_test = '2024-01-01',
-                                        end_test = '2024-12-31',
-                                        initial_cash=10000, 
-                                        investment_percentage=0.15, 
-                                        window_size=5):
+def lightgbm_trading_strategy(tickers = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META'],
+                            start_train = '2019-01-01',
+                            end_train = '2023-12-31',
+                            start_test = '2024-01-01',
+                            end_test = '2024-7-10', 
+                            initial_cash = 10000,
+                            investment_percentage=0.15, 
+                            window_size = 5):
     
     # 获取数据
     def download_data(ticker, start, end):
@@ -61,9 +61,9 @@ def lightgbm_trading_strategy(tickers,
         X_train, y_train = create_dataset(df_train, window_size)
         X_test, y_test = create_dataset(df_test, window_size)
 
-        # LightGBM requires 2D input
-        X_train = X_train.reshape((X_train.shape[0], X_train.shape[1]))
-        X_test = X_test.reshape((X_test.shape[0], X_test.shape[1]))
+        scaler = MinMaxScaler()
+        X_train = scaler.fit_transform(X_train.reshape(-1, window_size))
+        X_test = scaler.transform(X_test.reshape(-1, window_size))
 
         model = lgb.LGBMRegressor()
         model.fit(X_train, y_train)
@@ -108,6 +108,9 @@ def lightgbm_trading_strategy(tickers,
     # 计算策略收益率
     strategy_returns = np.diff(cash_history) / cash_history[:-1]
 
+    # 获取实际的交易天数
+    actual_trading_days = len(dates)
+
     # 绘制现金历史曲线并保存图片
     plt.figure(figsize=(12, 6))
     plt.plot(dates, cash_history, label='Portfolio Value')
@@ -121,19 +124,18 @@ def lightgbm_trading_strategy(tickers,
 
     # 计算Sharpe Ratio
     risk_free_rate = 0.01
-    excess_returns = strategy_returns - risk_free_rate / 252
-    sharpe_ratio = np.mean(excess_returns) / np.std(excess_returns) * np.sqrt(252)
+    excess_returns = strategy_returns - risk_free_rate / actual_trading_days
+    sharpe_ratio = np.mean(excess_returns) / np.std(excess_returns) * np.sqrt(actual_trading_days)
+    print(f"Sharpe Ratio: {sharpe_ratio:.2f}")
 
     # 计算Alpha和Beta
     benchmark_returns = benchmark['Return'][benchmark.index.isin(dates)]
     benchmark_returns = benchmark_returns.iloc[:len(strategy_returns)]  # 确保长度一致
     beta, alpha = np.polyfit(benchmark_returns, strategy_returns, 1)
-    alpha = alpha * 252  # 年化Alpha
+    alpha = alpha * actual_trading_days  # 年化Alpha
 
     # 计算最终收益
     final_cash = cash_history[-1]
     return_rate = (final_cash - initial_cash) / initial_cash * 100
-
+    
     return return_rate, sharpe_ratio, alpha, beta, image_path
-
-

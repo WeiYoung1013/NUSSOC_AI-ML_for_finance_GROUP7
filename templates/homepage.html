@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}首页 - 智能股票推荐系统{% endblock %}
+{% block title %}Homepage - Intelligent Stock Trading Bot{% endblock %}
 
 {% block head %}
 <!-- 引入 Bootstrap CSS -->
@@ -10,26 +10,32 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        font-size: 12px; /* 调整表格内容字体大小 */
     }
     th {
         font-size: 14px; /* 调整表头字体大小 */
     }
+    .table-wrapper {
+        overflow-x: auto; /* 增加水平滚动条 */
+    }
+    h2 {
+        font-size: 18px; /* 调整标题字体大小 */
+    }
 </style>
-
 {% endblock %}
 
 {% block content %}
 <div class="container" style="margin-top: 50px;">
     <div class="row">
-        <div class="col-md-4">
-            <h2>市值最高的前10支股票</h2>
+        <div class="col-md-4 table-wrapper">
+            <h2>Top 10 Stocks by Market Cap</h2>
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>股票代码</th>
-                        <th>市值</th>
-                        <th>增长量</th>
-                        <th>增长率</th>
+                        <th>Stock Code</th>
+                        <th>Market Cap</th>
+                        <th>Growth Amount</th>
+                        <th>Growth Rate</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -44,15 +50,15 @@
                 </tbody>
             </table>
         </div>
-        <div class="col-md-4">
-            <h2>增长量最高的前10支股票</h2>
+        <div class="col-md-4 table-wrapper">
+            <h2>Top 10 Stocks by Growth Amount</h2>
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>股票代码</th>
-                        <th>市值</th>
-                        <th>增长量</th>
-                        <th>增长率</th>
+                        <th>Stock Code</th>
+                        <th>Market Cap</th>
+                        <th>Growth Amount</th>
+                        <th>Growth Rate</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -67,15 +73,15 @@
                 </tbody>
             </table>
         </div>
-        <div class="col-md-4">
-            <h2>增长率最高的前10支股票</h2>
+        <div class="col-md-4 table-wrapper">
+            <h2>Top 10 Stocks by Growth Rate</h2>
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>股票代码</th>
-                        <th>市值</th>
-                        <th>增长量</th>
-                        <th>增长率</th>
+                        <th>Stock Code</th>
+                        <th>Market Cap</th>
+                        <th>Growth Amount</th>
+                        <th>Growth Rate</th>
                     </tr>
                 </thead>
                 <tbody>
