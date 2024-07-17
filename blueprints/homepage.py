@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, jsonify
 from StockAnalyzer import StockAnalyzer
 from extends import cache  # 导入缓存实例
 
@@ -17,7 +17,7 @@ def format_percentage(value):
         return f"{value:.2%}"  # 转换为百分比格式
     return value
 
-# 注册过滤器
+# 注册过滤器（这部分可以保留，但不影响REST API）
 @hp.app_template_filter()
 def scientific(value):
     return format_number(value)
@@ -30,19 +30,19 @@ def format_two_decimal(value):
 def percentage(value):
     return format_percentage(value)
 
-@hp.route('')
+@hp.route('', methods=['GET'])
 def homepage():
     data = cache.get('stock_data')
     if not data:
         data = get_stock_data()
         cache.set('stock_data', data, timeout=60*60)  # 缓存1小时
-    return render_template('homepage.html', **data)
+    return data, 200  # 返回JSON响应
 
 def get_stock_data():
     analyzer = StockAnalyzer()
-    top_10_market_cap = analyzer.get_top_10_by_market_cap().to_dict(orient='records')
-    top_10_growth_amount = analyzer.get_top_10_by_growth_amount().to_dict(orient='records')
-    top_10_growth_rate = analyzer.get_top_10_by_growth_rate().to_dict(orient='records')
+    top_10_market_cap = analyzer.get_top_10_by_market_cap()
+    top_10_growth_amount = analyzer.get_top_10_by_growth_amount()
+    top_10_growth_rate = analyzer.get_top_10_by_growth_rate()
     data = {
         'top_10_market_cap': top_10_market_cap,
         'top_10_growth_amount': top_10_growth_amount,

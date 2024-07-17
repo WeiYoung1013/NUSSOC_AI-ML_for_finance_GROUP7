@@ -6,9 +6,11 @@ from blueprints.auth import auth
 from extends import db, cache
 from flask_migrate import Migrate
 from models import UserModel
+from flask_cors import CORS
 
 
 app = Flask(__name__)
+CORS(app)
 app.secret_key = 'gaiucsahsaiuubviyh2'
 app.config.from_object(config)
 db.init_app(app)
